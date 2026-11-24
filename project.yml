@@ -1,0 +1,22 @@
+name: OldPlayer
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  OldPlayer:
+    type: application
+    platform: iOS
+    sources: [Sources]
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: OldPlayer
+        UILaunchScreen: {}
+        UIBackgroundModes: [audio]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.oldplayer
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
