@@ -1,22 +1,44 @@
-name: OldPlayer
-options:
-  bundleIdPrefix: com.example
-  deploymentTarget:
-    iOS: "15.0"
-targets:
-  OldPlayer:
-    type: application
-    platform: iOS
-    sources: [Sources]
-    info:
-      path: Info.plist
-      properties:
-        CFBundleDisplayName: OldPlayer
-        UILaunchScreen: {}
-        UIBackgroundModes: [audio]
-        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.oldplayer
-        SWIFT_VERSION: "5.0"
-        TARGETED_DEVICE_FAMILY: "1"
+name: Build IPA
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-13
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build unsigned archive
+        run: |
+          xcodebuild clean archive \
+            -project OldPlayer.xcodeproj \
+            -scheme OldPlayer \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath build/OldPlayer.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r build/OldPlayer.xcarchive/Products/Applications/OldPlayer.app build/Payload/
+          cd build && zip -r OldPlayer.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OldPlayer-IPA
+          path: build/OldPlayer.ipa
